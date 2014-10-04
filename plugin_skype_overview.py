@@ -2,6 +2,7 @@ from digitalforensics import *
 import os
 import fnmatch
 import win32api
+import sqlite3
 
 
 class skype_overview(Plugin):
@@ -18,7 +19,13 @@ class skype_overview(Plugin):
            print dbfiles
            # add information to database results.db using 4 parameters.
            self.results.append(Entry(self.PLUGIN_NAME, dbfiles, "Skype DB Files %s"%dbfiles, Entry.LEVEL_INFO))
+           if dbfiles.endswith('main.db'):
+               maindb = dbfiles
 
+              
+        
+        #print maindb
+        contacts = self.getSkypeMainDB(maindb)
            
 
     def getSkypeDBFiles(self):
@@ -42,7 +49,7 @@ class skype_overview(Plugin):
             for root, dirs, files in os.walk(d, topdown=True):
                 for directoryname in fnmatch.filter(dirs, 'Skype'):
                     skypedirfound.append((os.path.join(root,directoryname)))
-                   
+
 
 
         # loop over found skype directories and search for database files
@@ -52,23 +59,34 @@ class skype_overview(Plugin):
                 for name in files:
                     if name.endswith('.db'):
                         skypedbfiles.append((os.path.join(root, name)))
-                        
 
+                    
         #for dbfiles in skypedbfiles:
          #  print dbfiles
            # add information to database results.db using 4 parameters.
           # self.results.append(Entry(self.PLUGIN_NAME, dbfiles, "Skype DB Files %s"%dbfiles, Entry.LEVEL_INFO)) 
 
         return skypedbfiles
-        
 
 
+    def getSkypeMainDB(self, maindb):
+        #print maindb
+        conn = sqlite3.connect(maindb)
+        cursor = conn.cursor()
+        try:
+            cursor.execute("select skypename from contacts;")
+            for item in cursor:
+                print 'contacts: ' + str(item[0])
+        except sqlite3.OperationalError, e:
+            pass
 
+            
 
 plugin = skype_overview()
 
 if __name__ == "__main__":
     plugin.performScan()
+    
 
 
 
