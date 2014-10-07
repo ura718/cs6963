@@ -14,28 +14,51 @@ class skype_overview(Plugin):
     def performScan(self):
         skypedbfilesfullpath = ""
         skypedbfilesfullpath = self.getSkypeDBFiles()
-
+        maindb = []
+        
         for dbfiles in skypedbfilesfullpath:
            print dbfiles
            # add information to database results.db using 4 parameters.
-           self.results.append(Entry(self.PLUGIN_NAME, dbfiles, "Skype DB Files %s"%dbfiles, Entry.LEVEL_INFO))
-           if dbfiles.endswith('main.db'):
-               maindb = dbfiles
+           self.results.append(Entry(self.PLUGIN_NAME, dbfiles, "Skype DB Files %s" % dbfiles, Entry.LEVEL_INFO))
+           if dbfiles.endswith('\main.db'):
+               #maindb = dbfiles
+               maindb.append(dbfiles)
 
-        
+       
         print "\n"
-        
-        # Extract CONTACTS table information from maindb
-        contacts = self.getSkypeMainDB(maindb)
-        for item in contacts:
-            print "CONTACTS skypename: " + str(item[0])
-            print "fullname: " + str(item[1])
-            print "birthday: " + str(item[2])
-            print "country: " + str(item[3])
-            print "city: " + str(item[4]) + "\n"
-            self.results.append(Entry(self.PLUGIN_NAME, "contacts skypename: %s"%str(item[0]), "FullName: [%s], Birthday: [%s], Country: [%s], City: [%s] "%(str(item[1]),str(item[2]),str(item[3]),str(item[4])), Entry.LEVEL_INFO))
 
+        # loop over all main.db files that are found
+        for maindbfiles in maindb:
+            print "\n********************** \n"
+            accounts = self.getSkypeMainDBAccounts(maindbfiles)
+            for item in accounts:
+                print "ACCOUNTS skypename: " + str(item[0])
+                print "fullname: " + str(item[1])
+                print "birthday: " + str(item[2])
+                print "country: " + str(item[3])
+                print "province: " + str(item[4])
+                print "city: " + str(item[5])
+                print "phone_home: " + str(item[6])
+                print "phone_office: " + str(item[7])
+                print "phone_mobile: " + str(item[8])
+                print "emails: " + str(item[9])
+                self.results.append(Entry(self.PLUGIN_NAME, "Account skypename: %s" % str(item[0]), "FullName: [%s], Birthday: [%s], Country: [%s], Province: [%s], City: [%s], PhoneHome: [%s], PhoneOffice: [%s], PhoneMobile: [%s], Emails: [%s] " %(str(item[1]),str(item[2]),str(item[3]),str(item[4]),str(item[5]),str(item[6]),str(item[7]),str(item[8]),str(item[9])), Entry.LEVEL_INFO))
+                
 
+                
+            print "\n"
+            
+            # Extract CONTACTS table information from maindb
+            contacts = self.getSkypeMainDBcontacts(maindbfiles)
+            for item in contacts:
+                print "CONTACTS skypename: " + str(item[0])
+                print "fullname: " + str(item[1])
+                print "birthday: " + str(item[2])
+                print "country: " + str(item[3])
+                print "city: " + str(item[4]) + "\n"
+                self.results.append(Entry(self.PLUGIN_NAME, "contacts skypename: %s"%str(item[0]), "FullName: [%s], Birthday: [%s], Country: [%s], City: [%s] "%(str(item[1]),str(item[2]),str(item[3]),str(item[4])), Entry.LEVEL_INFO))
+
+            
 
 
 
@@ -73,28 +96,35 @@ class skype_overview(Plugin):
                     if name.endswith('.db'):
                         skypedbfiles.append((os.path.join(root, name)))
 
-                    
-        #for dbfiles in skypedbfiles:
-         #  print dbfiles
-           # add information to database results.db using 4 parameters.
-          # self.results.append(Entry(self.PLUGIN_NAME, dbfiles, "Skype DB Files %s"%dbfiles, Entry.LEVEL_INFO)) 
 
         return skypedbfiles
 
 
-    def getSkypeMainDB(self, maindb):
-        #print maindb
-        contacts = []
-        conn = sqlite3.connect(maindb)
+
+
+    def getSkypeMainDBAccounts(self, maindbfiles):
+        accounts = []
+        conn = sqlite3.connect(maindbfiles)
         cursor = conn.cursor()
         try:
-            # CONTACTS DB
-            cursor.execute("select skypename,fullname,birthday,country,city from contacts;")
+            # ACCOUNTS DB
+            cursor.execute("select skypename, fullname, birthday, country, province, city, phone_home, phone_office, phone_mobile, emails from accounts;")
             return cursor
-            #for item in cursor:
-            #    print 'skypename: ' + str(item[0])
-            
-            
+            conn.close()
+        except sqlite3.OperationalError, e:
+            pass
+
+
+
+
+    def getSkypeMainDBcontacts(self, maindbfiles):
+        contacts = []
+        conn = sqlite3.connect(maindbfiles)
+        cursor = conn.cursor() 
+        try:
+            # CONTACTS DB
+            cursor.execute("select skypename, fullname, birthday, country, city from contacts;")
+            return cursor     
             conn.close()
         except sqlite3.OperationalError, e:
             pass
