@@ -22,10 +22,23 @@ class skype_overview(Plugin):
            if dbfiles.endswith('main.db'):
                maindb = dbfiles
 
-              
         
-        #print maindb
+        print "\n"
+        
+        # Extract CONTACTS table information from maindb
         contacts = self.getSkypeMainDB(maindb)
+        for item in contacts:
+            print "CONTACTS skypename: " + str(item[0])
+            print "fullname: " + str(item[1])
+            print "birthday: " + str(item[2])
+            print "country: " + str(item[3])
+            print "city: " + str(item[4]) + "\n"
+            self.results.append(Entry(self.PLUGIN_NAME, "contacts skypename: %s"%str(item[0]), "FullName: [%s], Birthday: [%s], Country: [%s], City: [%s] "%(str(item[1]),str(item[2]),str(item[3]),str(item[4])), Entry.LEVEL_INFO))
+
+
+
+
+
            
 
     def getSkypeDBFiles(self):
@@ -71,14 +84,21 @@ class skype_overview(Plugin):
 
     def getSkypeMainDB(self, maindb):
         #print maindb
+        contacts = []
         conn = sqlite3.connect(maindb)
         cursor = conn.cursor()
         try:
-            cursor.execute("select skypename from contacts;")
-            for item in cursor:
-                print 'contacts: ' + str(item[0])
+            # CONTACTS DB
+            cursor.execute("select skypename,fullname,birthday,country,city from contacts;")
+            return cursor
+            #for item in cursor:
+            #    print 'skypename: ' + str(item[0])
+            
+            
+            conn.close()
         except sqlite3.OperationalError, e:
             pass
+
 
             
 
