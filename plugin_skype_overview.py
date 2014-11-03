@@ -15,13 +15,13 @@ class skype_overview(Plugin):
         skypedbfilesfullpath = ""
         skypedbfilesfullpath = self.getSkypeDBFiles()
         maindb = []
-        
+
+        # Add full path to db files to forensics database
         for dbfiles in skypedbfilesfullpath:
            print dbfiles
-           # add information to database results.db using 4 parameters.
+           # Add information to database results.db using 4 parameters.
            self.results.append(Entry(self.PLUGIN_NAME, dbfiles, "Skype DB Files %s" % dbfiles, Entry.LEVEL_INFO))
            if dbfiles.endswith('\main.db'):
-               #maindb = dbfiles
                maindb.append(dbfiles)
 
        
@@ -30,7 +30,8 @@ class skype_overview(Plugin):
         # loop over all main.db files that are found
         for maindbfiles in maindb:
             print "\n********************** \n"
-            accounts = self.getSkypeMainDBAccounts(maindbfiles)
+            # Extract ACCOUNTS table information from maindb
+            accounts = self.getSkypeMainDBaccounts(maindbfiles)
             for item in accounts:
                 print "ACCOUNTS skypename: " + str(item[0])
                 print "fullname: " + str(item[1])
@@ -51,14 +52,24 @@ class skype_overview(Plugin):
             # Extract CONTACTS table information from maindb
             contacts = self.getSkypeMainDBcontacts(maindbfiles)
             for item in contacts:
-                print "CONTACTS skypename: " + str(item[0])
-                print "fullname: " + str(item[1])
-                print "birthday: " + str(item[2])
-                print "country: " + str(item[3])
-                print "city: " + str(item[4]) + "\n"
+                print "CONTACTS skypename: %s" % item[0]
+                print "fullname: %s" % item[1]
+                print "birthday: %s" % item[2]
+                print "country: %s" % item[3]
+                print "city: %s" % item[4]
+                print "\n"
                 self.results.append(Entry(self.PLUGIN_NAME, "contacts skypename: %s"%str(item[0]), "FullName: [%s], Birthday: [%s], Country: [%s], City: [%s] "%(str(item[1]),str(item[2]),str(item[3]),str(item[4])), Entry.LEVEL_INFO))
 
-            
+
+
+            print "\n"
+
+            # Extract MESSAGES table information from maindb
+            messages = self.getSkypeMainDBmessages(maindbfiles)
+            for item in messages:
+                print "Messages> %s: %s " % (item[0], item[1])
+                self.results.append(Entry(self.PLUGIN_NAME, "Messages> ", "%s: %s"% (str(item[0]), str(item[1])), Entry.LEVEL_INFO))
+                
 
 
 
@@ -102,7 +113,7 @@ class skype_overview(Plugin):
 
 
 
-    def getSkypeMainDBAccounts(self, maindbfiles):
+    def getSkypeMainDBaccounts(self, maindbfiles):
         accounts = []
         conn = sqlite3.connect(maindbfiles)
         cursor = conn.cursor()
@@ -129,6 +140,20 @@ class skype_overview(Plugin):
         except sqlite3.OperationalError, e:
             pass
 
+
+    
+    def getSkypeMainDBmessages(self, maindbfiles):
+        messages = []
+        conn = sqlite3.connect(maindbfiles)
+        cursor = conn.cursor()
+        try:
+            # MESSAGES DB
+            cursor.execute("select from_dispname, body_xml from messages;")
+            return cursor
+            conn.close()
+        except sqlite3.OperationalError, e:
+            pass
+    
 
             
 
