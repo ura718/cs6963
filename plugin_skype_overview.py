@@ -58,7 +58,7 @@ class skype_overview(Plugin):
                 print "country: %s" % item[3]
                 print "city: %s" % item[4]
                 print "\n"
-                self.results.append(Entry(self.PLUGIN_NAME, "contacts skypename: %s"%str(item[0]), "FullName: [%s], Birthday: [%s], Country: [%s], City: [%s] "%(str(item[1]),str(item[2]),str(item[3]),str(item[4])), Entry.LEVEL_INFO))
+                self.results.append(Entry(self.PLUGIN_NAME, "Contacts skypename: %s"%str(item[0]), "FullName: [%s], Birthday: [%s], Country: [%s], City: [%s] "%(str(item[1]),str(item[2]),str(item[3]),str(item[4])), Entry.LEVEL_INFO))
 
 
 
@@ -71,6 +71,17 @@ class skype_overview(Plugin):
                 self.results.append(Entry(self.PLUGIN_NAME, "Messages> ", "%s: %s"% (str(item[0]), str(item[1])), Entry.LEVEL_INFO))
                 
 
+
+
+            print "\n"
+            # Extract CALLMEMBERS table information from maindb
+            callmembers = self.getSkypeMainDBcallmembers(maindbfiles)
+            for item in callmembers:
+                print "Destination Calls: %s" % item[0]
+                print "From-To: %s" % item[1]
+                print "Start Time: %s" % item[2]
+                print "Talk time minutes: %s" % item[3]
+                self.results.append(Entry(self.PLUGIN_NAME, "Destination Calls To: [%s]"% str(item[0]), "From-To: [%s], Start Time: [%s], Talk Time minutes: [%s]" % (str(item[1]),str(item[2]),str(item[3])), Entry.LEVEL_INFO)) 
 
 
            
@@ -154,6 +165,18 @@ class skype_overview(Plugin):
         except sqlite3.OperationalError, e:
             pass
     
+
+    def getSkypeMainDBcallmembers(self, maindbfiles):
+        callmembers = []
+        conn = sqlite3.connect(maindbfiles)
+        cursor = conn.cursor()
+        try:
+            # CALLMEMBERS DB skype-to-phone
+            cursor.execute("select identity as destination_call,guid,strftime('%m-%d-%Y %H:%M:%S', start_timestamp,'unixepoch','localtime') as start_time,call_duration/60 as num_minutes from callmembers order by id;")
+            return cursor
+            conn.close()
+        except sqlite3.OperationalError, e:
+            pass
 
             
 
