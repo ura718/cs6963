@@ -67,8 +67,8 @@ class skype_overview(Plugin):
             # Extract MESSAGES table information from maindb
             messages = self.getSkypeMainDBmessages(maindbfiles)
             for item in messages:
-                print "Messages> %s: %s " % (item[0], item[1])
-                self.results.append(Entry(self.PLUGIN_NAME, "Messages> ", "%s: %s"% (str(item[0]), str(item[1])), Entry.LEVEL_INFO))
+                print "[%s] %s : %s" % (item[1], item[0], item[2])
+                self.results.append(Entry(self.PLUGIN_NAME, "Messages Time: [%s] Source: %s"%(str(item[1]),str(item[0])), " %s"% str(item[2]), Entry.LEVEL_INFO))
                 
 
 
@@ -81,7 +81,7 @@ class skype_overview(Plugin):
                 print "From-To: %s" % item[1]
                 print "Start Time: %s" % item[2]
                 print "Talk time minutes: %s" % item[3]
-                self.results.append(Entry(self.PLUGIN_NAME, "Destination Calls To: [%s]"% str(item[0]), "From-To: [%s], Start Time: [%s], Talk Time minutes: [%s]" % (str(item[1]),str(item[2]),str(item[3])), Entry.LEVEL_INFO)) 
+                self.results.append(Entry(self.PLUGIN_NAME, "Destination Calls To: [%s]"% str(item[0]), "From-To: [%s], Start Time: [%s], Talk Time: [%s minutes]" % (str(item[1]),str(item[2]),str(item[3])), Entry.LEVEL_INFO)) 
 
 
            
@@ -159,7 +159,7 @@ class skype_overview(Plugin):
         cursor = conn.cursor()
         try:
             # MESSAGES DB
-            cursor.execute("select from_dispname, body_xml from messages;")
+            cursor.execute("select author as source,strftime('%m-%d-%Y %H:%M:%S', timestamp,'unixepoch','localtime') as start_time,body_xml as message from messages;")
             return cursor
             conn.close()
         except sqlite3.OperationalError, e:
