@@ -52,13 +52,13 @@ class skype_overview(Plugin):
             # Extract CONTACTS table information from maindb
             contacts = self.getSkypeMainDBcontacts(maindbfiles)
             for item in contacts:
-                print "CONTACTS skypename: %s" % item[0]
+                print "CONTACTS List: %s" % item[0]
                 print "fullname: %s" % item[1]
                 print "birthday: %s" % item[2]
                 print "country: %s" % item[3]
                 print "city: %s" % item[4]
                 print "\n"
-                self.results.append(Entry(self.PLUGIN_NAME, "Contacts skypename: %s"%str(item[0]), "FullName: [%s], Birthday: [%s], Country: [%s], City: [%s] "%(str(item[1]),str(item[2]),str(item[3]),str(item[4])), Entry.LEVEL_INFO))
+                self.results.append(Entry(self.PLUGIN_NAME, "Contacts List: %s"%str(item[0]), "Contact List: %s == FullName: [%s], Birthday: [%s], Country: [%s], City: [%s] "%(str(item[0]),str(item[1]),str(item[2]),str(item[3]),str(item[4])), Entry.LEVEL_INFO))
 
 
 
@@ -67,8 +67,8 @@ class skype_overview(Plugin):
             # Extract MESSAGES table information from maindb
             messages = self.getSkypeMainDBmessages(maindbfiles)
             for item in messages:
-                print "[%s] %s : %s" % (item[1], item[0], item[2])
-                self.results.append(Entry(self.PLUGIN_NAME, "Messages Time: [%s] Source: %s"%(str(item[1]),str(item[0])), " %s"% str(item[2]), Entry.LEVEL_INFO))
+                print "ChatLogs: [%s] %s : %s" % (item[1], item[0], item[2])
+                self.results.append(Entry(self.PLUGIN_NAME, "Chat Log: [%s] "%str(item[1]), "%s: %s"% (str(item[0]), str(item[2])), Entry.LEVEL_INFO))
                 
 
 
@@ -80,11 +80,11 @@ class skype_overview(Plugin):
                 print "Destination Calls: %s" % item[0]
                 print "From-To: %s" % item[1]
                 print "Start Time: %s" % item[2]
-                print "Talk time minutes: %s" % item[3]
+                print "Talk time: %s minutes" % item[3]
                 self.results.append(Entry(self.PLUGIN_NAME, "Destination Calls To: [%s]"% str(item[0]), "From-To: [%s], Start Time: [%s], Talk Time: [%s minutes]" % (str(item[1]),str(item[2]),str(item[3])), Entry.LEVEL_INFO)) 
 
 
-           
+            print "\n\n"
 
     def getSkypeDBFiles(self):
         # create empty arrays
